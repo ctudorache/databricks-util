@@ -1,3 +1,5 @@
+import datetime
+
 def str_human_duration(sec):
     td = datetime.timedelta(seconds=sec)
     if td.days < 0:
