@@ -33,10 +33,12 @@ def str_human_delta(value, reference, str_human_format_func):
     delta = value - reference
     sign = '+' if delta >= 0 else ''
     percentage = delta / reference if reference > 0 else 0
-    return f"{sign}{str_human_format_func(delta)} ({sign}{percentage})"
+    return f"{sign}{str_human_format_func(delta)} ({sign}{str_human_percentage(percentage)})"
 
 def str_human_delta_sec(value_sec, reference_sec): return str_human_delta(value_sec, reference_sec, str_human_seconds)
 def str_human_delta_meters(value_m, reference_m): return str_human_delta(value_m, reference_m, str_human_meters)
 
 def str_lat_lng(lat, lng):
     return f"{lat:.6f},{lng:.6f}"
+
+print(f"test str_human_duration(123) -> {str_human_duration(123)}")
