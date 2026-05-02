@@ -88,7 +88,7 @@ class RouteTollsClient:
             })
         return locations
 
-    def get_tolls_for_route_locations(self, city_id, country_code, currency, category_id, locations, start_sec):
+    def get_tolls_for_route_locations(self, city_id, country_code, currency, category_id, locations, start_sec, provider=None):
         simple_route = {
             "route_id": "7",
             "locations": locations
@@ -107,15 +107,22 @@ class RouteTollsClient:
             ]
         }
 
+        if provider:
+            req['downstream_service'] = provider
+        
+        if req['downstream_service'] == 'toll-roads-edge-detection':
+            req['downstream_service'] = 'toll-roads'
+            req['enable_edge_detection'] = True
+
         resp = self.call_endpoint(self.get_get_tolls_for_route_url(), 'POST', req)
         if self.rpc_options and self.rpc_options.log_service_response:
             print(f"Tolls: {resp}")
 
         return resp
     
-    def get_tolls_for_route_polyline(self, city_id, country_code, currency, category_id, polyline_str, start_sec):
+    def get_tolls_for_route_polyline(self, city_id, country_code, currency, category_id, polyline_str, start_sec, provider=None):
         locations = RouteTollsClient.decode_polyline_to_locations(polyline_str, start_sec)
-        return self.get_tolls_for_route_locations(city_id, country_code, currency, category_id, locations, start_sec)
+        return self.get_tolls_for_route_locations(city_id, country_code, currency, category_id, locations, start_sec, provider)
 
     def get_tolls_for_route_with_auto_resolve(self, polyline_str, start_sec):
         locations = RouteTollsClient.decode_polyline_to_locations(polyline_str, start_sec)

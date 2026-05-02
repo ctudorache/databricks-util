@@ -9,7 +9,7 @@ from typing import List
 sys.path.insert(0, '..') # directory containing "my_util/"
 from my_util.csv_util import zip_dir_for_download
 
-def export_tollguru_request(output_dir: str, created_dt: datetime.datetime, polyline: str, timestamps: List[int], is_before_trip: bool, order_id: int):
+def export_tollguru_request(output_dir: str, created_dt: datetime.datetime, polyline: str, timestamps: List[int], request_num: int, order_id: int, is_before_trip: bool):
     get_tolls_dt_str = created_dt.strftime('%Y-%m-%d-%H-%M-%S')
         
     req = {
@@ -22,7 +22,7 @@ def export_tollguru_request(output_dir: str, created_dt: datetime.datetime, poly
 
     req_json = json.dumps(req, indent=4)
     before_or_after_trip_str = "before-trip" if is_before_trip else "after-trip"
-    output_filename = f'order-{order_id}-ts-{get_tolls_dt_str}-{before_or_after_trip_str}.json'
+    output_filename = f'{request_num}-order-{order_id}-ts-{get_tolls_dt_str}-{before_or_after_trip_str}.json'
     output_filepath = os.path.join(output_dir, output_filename)
 
     with open(output_filepath, 'w') as f:
@@ -45,8 +45,9 @@ def export_tollguru_requests_to_json_for_download(df, df_name: str):
             created_dt = row['created'],
             polyline = row['polyline'],
             timestamps = list(map(int, json.loads(row['timestamps']))),
-            is_before_trip = not row['is_price_prediction'],
-            order_id = row['order_id']
+            request_num = index,
+            order_id = row['order_id'],
+            is_before_trip = not row['is_price_prediction']
         )
 
     zip_dir_for_download(output_dirpath)

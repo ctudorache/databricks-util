@@ -42,3 +42,17 @@ def atlas_polyline_url(polyline1, polyline2 = None, polyline3 = None):
 
 def atlas_polyline_link(polyline1, polyline2 = None, polyline3 = None):
     return mk_link("polyline-visualisation", atlas_polyline_url(polyline1, polyline2, polyline3))
+
+def admin_tolls_for_route_url(polyline):
+    form_data = {
+        "route_polyline": polyline
+    }
+    form_data_json = urllib.parse.quote(json.dumps(form_data))
+    return f"https://admin-panel.bolt.eu/geo/routing/getTollsForRoute?formData={form_data_json}"
+
+def admin_tolls_for_route_link(polyline):
+    return mk_link("tolls_for_route", admin_tolls_for_route_url(polyline))
+
+
+example_polyline = "gkenGab`~ClBCIgMbESv@sAEcAdCyA~FyE^o@ZuAGs@uAcCA_@fJ_QwFcHsHeG_BSo@e@aFaJwUm_@gVqa@]kV`A_\k@wMKeH}BsMlD{D}BiKo@wHyBiLVcIW{B}AuFiAmHaGiA|BxNKj@~@w@";
+mk_print(f"Example: {admin_tolls_for_route_link(example_polyline)}")

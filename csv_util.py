@@ -80,7 +80,13 @@ def zip_dir_for_download(dirpath):
     zip_filename = os.path.basename(dirpath)
     return zip_files_for_download(dirpath, filepaths, zip_filename)
 
-def save_panda_df_to_csv_for_download(df, df_name, chunk_size):
+def make_empty_dir(dirpath):
+    if os.path.exists(dirpath):
+        shutil.rmtree(dirpath)
+    os.makedirs(dirpath, exist_ok=True)
+    return dirpath
+
+def save_panda_df_to_csv_for_download(df, df_name, chunk_size = None):
     csv_filepath = f'/dbfs/ctudorache/tmp/{df_name}/{df_name}-data.csv'
 
     parent_dirpath = os.path.dirname(csv_filepath)
@@ -91,6 +97,8 @@ def save_panda_df_to_csv_for_download(df, df_name, chunk_size):
         csv_filename = csv_filename[:-4]
 
     row_count = len(df.index)
+    if not chunk_size:
+        chunk_size = row_count
     chunk_count = row_count // chunk_size + 1
 
     print(f"Saving: {csv_filepath}, rows: {row_count}, chunk_size: {chunk_size} => chunk_count: {chunk_count}")
@@ -108,6 +116,23 @@ def save_panda_df_to_csv_for_download(df, df_name, chunk_size):
 
     # zip CSV files
     zip_files_for_download(parent_dirpath, csv_filenames)
+
+def save_panda_df_to_parquet_for_download(df, df_name, partition_by_columns=["created_at_date"]):
+    output_dirpath = make_empty_dir(f'/dbfs/ctudorache/tmp/{df_name}/{df_name}-data.parquet')
+    df.to_parquet(path=output_dirpath, partition_cols=partition_by_columns)
+    zip_dir_for_download(output_dirpath)
+
+def save_pyspark_df_to_csv_for_download(df, df_name, partition_cols=[]):
+    output_dirpath = make_empty_dir(f'/dbfs/ctudorache/tmp/{df_name}/{df_name}-data.csv')
+    pyspark_output_dirpath = output_dirpath.replace('/dbfs/', '/') # pyspark assumes paths are relative to /dbfs/
+    df.write.partitionBy(partition_cols).options(header='True', delimiter=',').mode('overwrite').csv(pyspark_output_dirpath)
+    zip_dir_for_download(output_dirpath)
+
+def save_pyspark_df_to_parquet_for_download(df, df_name, partition_cols=[]):
+    output_dirpath = make_empty_dir(f'/dbfs/ctudorache/tmp/{df_name}/{df_name}-data.parquet')
+    pyspark_output_dirpath = output_dirpath.replace('/dbfs/', '/') # pyspark assumes paths are relative to /dbfs/
+    df.write.partitionBy(partition_cols).parquet(pyspark_output_dirpath, mode="overwrite")
+    zip_dir_for_download(output_dirpath)
 
 
 # delete_dir('/dbfs/ctudorache/tmp')

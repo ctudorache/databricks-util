@@ -86,3 +86,9 @@ def df_persistence_load(df_name, sql_text):
     
     return  pd.concat([pd.read_pickle(os.path.join(df_dirpath, f)) for f in filenames])
     
+def df_persistence_clear(df_name):
+    dirpath = df_persistence_rootpath(df_name)
+    if os.path.exists(dirpath):
+        shutil.rmtree(dirpath)
+    df_persistence_log(f"Cleanup: {dirpath}")
+
